@@ -1,4 +1,6 @@
-package com.lcw.learn.mybatis;
+package com.lcw.learn.mybatis.mapper;
+
+import com.lcw.learn.mybatis.bean.UserBean;
 
 import java.util.List;
 

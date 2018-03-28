@@ -1,4 +1,4 @@
-package com.lcw.learn.mybatis;
+package com.lcw.learn.mybatis.bean;
 
 import java.io.Serializable;
 

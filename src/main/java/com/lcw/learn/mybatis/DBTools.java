@@ -16,7 +16,7 @@ public class DBTools {
 
     static {
         try {
-            Reader reader = Resources.getResourceAsReader("classpath:mybatis.cfg.xml");
+            Reader reader = Resources.getResourceAsReader("mybatis.cfg.xml");
             sessionFactory = new SqlSessionFactoryBuilder().build(reader);
         } catch (IOException e) {
             e.printStackTrace();

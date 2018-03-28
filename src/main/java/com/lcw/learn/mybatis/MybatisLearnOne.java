@@ -1,5 +1,7 @@
 package com.lcw.learn.mybatis;
 
+import com.lcw.learn.mybatis.bean.UserBean;
+import com.lcw.learn.mybatis.mapper.UserMapper;
 import org.apache.ibatis.session.SqlSession;
 
 /**
@@ -13,7 +15,7 @@ public class MybatisLearnOne {
     private static void insertUser(){
         SqlSession session = DBTools.getSession();
         UserMapper mapper = session.getMapper(UserMapper.class);
-        UserBean userBean = new UserBean("username","pasword",700.0);
+        UserBean userBean = new UserBean(1,"username","pasword",700.0);
         try {
             mapper.insertUser(userBean);
         } catch (Exception e) {
