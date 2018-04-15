@@ -56,4 +56,14 @@ public class UserBean implements Serializable{
     public void setAccount(Double account) {
         this.account = account;
     }
+
+    @Override
+    public String toString() {
+        return "UserBean{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", account=" + account +
+                '}';
+    }
 }

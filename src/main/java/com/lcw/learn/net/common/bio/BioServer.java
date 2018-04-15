@@ -19,7 +19,7 @@ import java.net.Socket;
 public class BioServer {
 
      // 默认端口号
-    private static final int PORT= 1020 ;
+    private static final int PORT= 12345 ;
 
     //服务端，单实例连接
     private static ServerSocket serverSocket ;
@@ -42,7 +42,6 @@ public class BioServer {
         }finally {
             if(serverSocket != null) {
                serverSocket.close();
-                System.out.println("server has closed!");
                 serverSocket = null;
             }
         }
@@ -63,16 +62,49 @@ public class BioServer {
                 in = new BufferedReader(new InputStreamReader( socket.getInputStream()));
                 out = new PrintWriter(socket.getOutputStream(),true);
                 String message = null;
-                while((message = in.readLine())!= null){
-
-
+                while(true) {
+                    while ((message = in.readLine()) != null) {
+                        System.out.println(message);
+                        out.println("server receive client message:["+message+"]success");
+                        out.flush();
+                    }
+                    break;
                 }
 
             }catch (Exception ex){
                 System.out.println(ex);
             }finally {
+                    if( in != null) {
+                        try {
+                            in.close();
+                            in = null;
+                        }catch(Exception ex) {
+                            System.out.println("in close exception is "+ex.getMessage());
+                        }
+                    }
+                if( out != null) {
+                    try {
+                        out.close();
+                        out = null;
+                    }catch(Exception ex) {
+                        System.out.println("out close exception is "+ex.getMessage());
+                    }
+                }
+
+                if( socket != null) {
+                    try {
+                        socket.close();
+                        socket = null;
+                    }catch(Exception ex) {
+                        System.out.println("socker close exception is "+ex.getMessage());
+                    }
+                }
 
             }
         }
+    }
+
+    public static void main(String[] args) throws IOException {
+        new BioServer().start();
     }
 }
