@@ -6,6 +6,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
+import java.util.Scanner;
 import java.util.Set;
 
 /**
@@ -37,9 +38,12 @@ public class NioClient {
 
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception{
         NioClient nioClient = new NioClient();
         nioClient.start();
+        while(nioClient.sendMsg(new Scanner(System.in).nextLine())){
+        }
+//        nioClient.sendMsg("I'm come from china");
     }
 
     class NioClientHandle implements Runnable{
@@ -57,7 +61,7 @@ public class NioClient {
                     //创建选择器
                     selector = Selector.open();
                     //打开监听通道
-                    socketChannel = SocketChannel.open();
+                    socketChannel = SocketChannel.open(new InetSocketAddress(host,port));
                     //如果为true，表示为阻塞，如果为false,表示为非阻塞
                     socketChannel.configureBlocking(false);
                     started = true ;
@@ -75,11 +79,7 @@ public class NioClient {
         public void run(){
                 try{
                     //进行连接操作
-                    boolean hasConnected = socketChannel.connect(new InetSocketAddress(host,port));
-                    if(hasConnected){
-                        socketChannel.register(selector, SelectionKey.OP_CONNECT);
-                    }
-
+                    socketChannel.register(selector, SelectionKey.OP_CONNECT);
                 }catch (Exception ex){
                     System.out.println(ex.getMessage());
                     System.exit(1);
@@ -88,9 +88,7 @@ public class NioClient {
                 while(started) {
                     try{
                         //无论是否有读写事件发生，selector每隔1S被唤醒一次
-                        selector.select(1000);
-                        //阻塞，只有当一个注册事件发生的时候才会继续
-                        //selector.select();
+                        selector.select();
                         Set<SelectionKey>  keys = selector.selectedKeys();
                         Iterator<SelectionKey> iterator = keys.iterator();
                         SelectionKey key = null;
