@@ -60,7 +60,7 @@ public class NioClient {
                 try {
                     //创建选择器
                     selector = Selector.open();
-                    //打开监听通道
+                    //打开监听通道，需要在此刻进行地址输入的连接
                     socketChannel = SocketChannel.open(new InetSocketAddress(host,port));
                     //如果为true，表示为阻塞，如果为false,表示为非阻塞
                     socketChannel.configureBlocking(false);
