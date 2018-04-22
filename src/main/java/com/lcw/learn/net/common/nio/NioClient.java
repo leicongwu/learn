@@ -98,31 +98,30 @@ public class NioClient {
                             try {
                                 //处理消息
                                 if(key.isValid()) {
-                                    SocketChannel sc = (SocketChannel)key.channel();
-                                    if(!key.isConnectable()){
-                                        System.exit(1);
-                                    }
-                                    //读消息
-                                    if(key.isReadable()) {
-                                        //创建ByterBuffer,并开辟一个1M的缓冲区
-                                        ByteBuffer buffer = ByteBuffer.allocate(1024);
-                                        //读取请求流，返回读取到的字节数
-                                        int readBytes = sc.read(buffer);
-                                        //读取到字节，对字节进行编解码
-                                        if(readBytes > 0 ){
-                                            //将缓冲区当前的limit设置为position = 0用于后续对缓冲区的读取操作
-                                            buffer.flip();
-                                            byte[] bytes = new byte[buffer.remaining()];
-                                            buffer.get(bytes);
-                                            String result = new String(bytes,"UTF-8");
-                                            System.out.println("Client receive message" + result);
-                                        }else if( readBytes < 0 ){
-                                            key.cancel();
-                                            sc.close();
+                                    SocketChannel sc = (SocketChannel) key.channel();
+                                    if (key.isConnectable()) {
+                                        //读消息
+                                        if (key.isReadable()) {
+                                            //创建ByterBuffer,并开辟一个1M的缓冲区
+                                            ByteBuffer buffer = ByteBuffer.allocate(1024);
+                                            //读取请求流，返回读取到的字节数
+                                            int readBytes = sc.read(buffer);
+                                            //读取到字节，对字节进行编解码
+                                            if (readBytes > 0) {
+                                                //将缓冲区当前的limit设置为position = 0用于后续对缓冲区的读取操作
+                                                buffer.flip();
+                                                byte[] bytes = new byte[buffer.remaining()];
+                                                buffer.get(bytes);
+                                                String result = new String(bytes, "UTF-8");
+                                            } else if (readBytes < 0) {
+                                                key.cancel();
+                                                sc.close();
+                                            }
+                                            sc.register(selector, SelectionKey.OP_CONNECT);
                                         }
+
                                     }
                                 }
-
                             }catch (Exception ex){
                                 if(key != null ){
                                     key.cancel();
@@ -150,7 +149,6 @@ public class NioClient {
         }
 
         public void sendMsg(String msg) throws Exception{
-            socketChannel.register(selector,SelectionKey.OP_WRITE);
             //进行异步消息的发送
             //将消息编码为字节数组
             byte[] bytes = msg.getBytes();
@@ -162,6 +160,7 @@ public class NioClient {
             writerBuffer.flip();
             //发送缓冲区的字节数组
             socketChannel.write(writerBuffer);
+            socketChannel.register(selector,SelectionKey.OP_READ);
         }
     }
 }

@@ -1,15 +1,17 @@
 package com.lcw.learn.net.common.nio;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Created by leicongwu on 2018/4/15.
@@ -17,6 +19,8 @@ import java.util.Set;
 public class NioServer {
     private static final int DEFAULT_PORT =12345;
     private static final String DEFALUT_HOST = "127.0.0.1";
+    private ExecutorService tp = Executors.newCachedThreadPool();
+    public static Map<Socket,Long> time_stat = new HashMap<Socket, Long>(10240);
     private static  NioServerHandle serverHandle;
 
     public void start(){
@@ -105,85 +109,99 @@ public class NioServer {
         }
 
         private void handleSelector(SelectionKey key) throws IOException {
-            if (key.isValid()) {
-                //处理新接入的请求消息
-                if (key.isAcceptable()) {
-                    ServerSocketChannel ssc = (ServerSocketChannel) key.channel();
-                    //通过ServerSocketChannel的accept创建SocketChannel实例
-                    //完成该操作意味着完成TCP三次握手，TCP物理链路正式建立
-                    SocketChannel sc = ssc.accept();
-                    //设置为非阻塞的
-                    sc.configureBlocking(false);
-                    //注册为读
-                    sc.register(selector, SelectionKey.OP_READ);
+            if(key.isAcceptable()){
+                doAccept(key);
+            }else if( key.isValid() && key.isReadable()) {
+                Socket socket = ((SocketChannel)(key.channel())).socket();
+                if(!time_stat.containsKey(socket)){
+                    time_stat.put(socket,System.currentTimeMillis());
                 }
+                doRead(key);
+            }else if( key.isValid() && key.isWritable()) {
+                doWrite(key);
+                long end = System.currentTimeMillis();
+                Socket socket = ((SocketChannel)(key.channel())).socket();
+                long start = time_stat.remove(socket);
+                System.out.println("spend time "+(end-start)+"ms");
+            }
 
-                //读消息
-                if (key.isReadable()) {
-                    System.out.println("start read!" + new Date());
-                    SocketChannel sc = (SocketChannel) key.channel();
-                    //创建ByteBuffer，并开辟一个1M的缓冲区
-                    ByteBuffer buffer = ByteBuffer.allocate(1024);
-                    int readBytes = sc.read(buffer);
-                    if (readBytes > 0) {
-                        //将缓冲区当前的limit设置为position=0 ，用于后续对缓冲区的读取操作。
-                        buffer.flip();
-                        //根据缓冲区可读字节创建字节数组
-                        byte[] bytes = new byte[buffer.remaining()];
-                        //将缓冲区可读字节数组复制到新建的数组中
-                        buffer.get(bytes);
-                        String message = new String(bytes, "UTF-8");
-                        /*
-                        //响应客户端消息
-                        //将消息编码为字节数组
-                        byte[] clientBytes = message.getBytes();
-                        //根据数组容量创建ByteBuffer
-                        ByteBuffer writerBuffer = ByteBuffer.allocate(clientBytes.length);
-                        //将字节数组复制到缓冲区
-                        writerBuffer.put(clientBytes);
-                        //flip操作
-                        writerBuffer.flip();
-                        sc.write(writerBuffer);
-                        */
-                        System.out.println("client message is" +message);
-                        key.interestOps(SelectionKey.OP_WRITE);
-                    } else if (readBytes < 0) {
-                        key.cancel();
-                        sc.close();
-                    }
-                }
+        }
+        private void doAccept(SelectionKey key) {
+            ServerSocketChannel server = (ServerSocketChannel) key.channel();
+            SocketChannel clientChannel;
+            try{
+                clientChannel = server.accept();
+                clientChannel.configureBlocking(false);
+                SelectionKey clientKey = clientChannel.register(selector,SelectionKey.OP_READ);
+                //连接后进行处理
+                EchoClient echoClient = new EchoClient();
+                key.attach(echoClient);
 
-                //写消息
-                if (key.isWritable()) {
-                    System.out.println("start write!" + new Date());
-                    SocketChannel sc = (SocketChannel) key.channel();
-                    //创建ByteBuffer，并开辟一个1M的缓冲区
-                    ByteBuffer buffer = ByteBuffer.allocate(1024);
-                    int readBytes = sc.read(buffer);
-                    if (readBytes > 0) {
-                        //将缓冲区当前的limit设置为position=0 ，用于后续对缓冲区的读取操作。
-                        buffer.flip();
-                        //根据缓冲区可读字节创建字节数组
-                        byte[] bytes = new byte[buffer.remaining()];
-                        //将缓冲区可读字节数组复制到新建的数组中
-                        buffer.get(bytes);
-                        String message = new String(bytes, "UTF-8");
-                        //响应客户端消息
-                        //将消息编码为字节数组
-                        byte[] clientBytes = message.getBytes();
-                        //根据数组容量创建ByteBuffer
-                        ByteBuffer writerBuffer = ByteBuffer.allocate(clientBytes.length);
-                        //将字节数组复制到缓冲区
-                        writerBuffer.put(clientBytes);
-                        //flip操作
-                        writerBuffer.flip();
-                        sc.write(writerBuffer);
-                    } else if (readBytes < 0) {
-                        key.cancel();
-                        sc.close();
-                    }
+                InetAddress clientAddress = clientChannel.socket().getInetAddress();
+                System.out.println("accept connect from ip:" + clientAddress.getHostAddress()+"；port："+clientChannel.socket().getPort());
+            }catch (Exception ex) {
+                System.out.println("fail to accept client");
+                ex.printStackTrace();
+            }
+
+        }
+
+        private void doRead(SelectionKey key) {
+            SocketChannel clientChannel = (SocketChannel) key.channel();
+            ByteBuffer readBuffer = ByteBuffer.allocate(1024);
+            int len = 0;
+            try{
+                len = clientChannel.read(readBuffer);
+                if( len < 0 ){
+                    disconnected(key);
                 }
+            }catch (Exception ex){
+                System.out.println("fail to read from client");
+                ex.printStackTrace();
+                disconnected(key);
+                return;
+            }
+            System.out.println("read msg!");
+            readBuffer.flip();
+            tp.execute(new HandleMsg(key,readBuffer,selector));
+        }
+
+
+        private void doWrite(SelectionKey key) {
+            SocketChannel channel =  (SocketChannel)key.channel();
+            EchoClient echoClient = (EchoClient) key.attachment();
+            LinkedList<ByteBuffer> q = echoClient.getMessageQuen();
+            ByteBuffer writerBuffer = q.getLast();
+            try{
+                int len = channel.write(writerBuffer);
+                if( len == -1) {
+                    disconnected(key);
+                    return;
+                }
+                if( writerBuffer.remaining() == 0 ){
+                    q.removeLast();
+                }
+            }catch (Exception ex) {
+                System.out.println("failed to write to client");
+                ex.printStackTrace();
+                disconnected(key);
+            }
+            System.out.println("read msg");
+            if( q.size() == 0 ) {
+                key.interestOps(SelectionKey.OP_WRITE);
             }
         }
+
+        private void disconnected(SelectionKey key) {
+            try {
+                key.channel().close();
+                System.out.println("close client !");
+            } catch (IOException e) {
+                System.out.println("failed to close channel!");
+                e.printStackTrace();
+            }
+        }
+
+
     }
 }
