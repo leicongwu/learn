@@ -152,18 +152,28 @@ public class NioServer {
             int len = 0;
             try{
                 len = clientChannel.read(readBuffer);
-                if( len < 0 ){
+               /*
+               if( len < 0 ){
                     disconnected(key);
                 }
+                */
+                System.out.println("read msg!"+new String(readBuffer.array()));
             }catch (Exception ex){
                 System.out.println("fail to read from client");
                 ex.printStackTrace();
                 disconnected(key);
                 return;
             }
-            System.out.println("read msg!");
             readBuffer.flip();
-            tp.execute(new HandleMsg(key,readBuffer,selector));
+            ByteBuffer serverBuffer = ByteBuffer.allocate(1024);
+            serverBuffer.put(new String("hello client").getBytes());
+            serverBuffer.flip();
+            try {
+                clientChannel.write(serverBuffer);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+//            tp.execute(new HandleMsg(key,readBuffer,selector));
         }
 
 
@@ -173,6 +183,7 @@ public class NioServer {
             LinkedList<ByteBuffer> q = echoClient.getMessageQuen();
             ByteBuffer writerBuffer = q.getLast();
             try{
+                System.out.println("正在写入到客户端信息...");
                 int len = channel.write(writerBuffer);
                 if( len == -1) {
                     disconnected(key);
