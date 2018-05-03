@@ -152,12 +152,12 @@ public class NioServer {
             int len = 0;
             try{
                 len = clientChannel.read(readBuffer);
-               /*
+
                if( len < 0 ){
                     disconnected(key);
                 }
-                */
-                System.out.println("read msg!"+new String(readBuffer.array()));
+                System.out.println("server read:");
+                System.out.println(new String(readBuffer.array(),"UTF-8"));
             }catch (Exception ex){
                 System.out.println("fail to read from client");
                 ex.printStackTrace();

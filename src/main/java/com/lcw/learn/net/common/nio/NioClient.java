@@ -6,7 +6,6 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
-import java.util.Scanner;
 import java.util.Set;
 
 /**
@@ -41,8 +40,8 @@ public class NioClient {
     public static void main(String[] args) throws Exception{
         NioClient nioClient = new NioClient();
         nioClient.start();
-        while(nioClient.sendMsg(new Scanner(System.in).nextLine())){
-        }
+//        while(nioClient.sendMsg(new Scanner(System.in).nextLine())){
+//        }
 //        nioClient.sendMsg("I'm come from china");
     }
 
@@ -80,7 +79,7 @@ public class NioClient {
                 try{
                     //进行连接操作
                     socketChannel.register(selector, SelectionKey.OP_CONNECT);
-                    sendMsg("hello");
+                    sendMsg("你好啊");
                 }catch (Exception ex){
                     System.out.println(ex.getMessage());
                     System.exit(1);
@@ -152,7 +151,7 @@ public class NioClient {
         public void sendMsg(String msg) throws Exception{
             //进行异步消息的发送
             //将消息编码为字节数组
-            byte[] bytes = msg.getBytes();
+            byte[] bytes = msg.getBytes("UTF-8");
             //根据数组容量创建ByteBuffer
             ByteBuffer writerBuffer = ByteBuffer.allocate(bytes.length);
             //将字节数组复制到缓冲区

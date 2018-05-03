@@ -7,11 +7,5 @@ public class NioTest {
 
     public static void main(String[] args) throws Exception{
         new NioServer().start();
-        Thread.sleep(2000);
-       /* NioClient nioClient = new NioClient();
-        nioClient.start();
-        while(nioClient.sendMsg(new Scanner(System.in).nextLine())){
-            nioClient.sendMsg("你好啊");
-        }*/
     }
 }
