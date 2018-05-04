@@ -149,6 +149,12 @@
             <version>2.5</version>
             <scope>test</scope>
         </dependency>
+        <!--freemarker dependency-->
+        <dependency>
+            <groupId>org.freemarker</groupId>
+            <artifactId>freemarker</artifactId>
+            <version>2.3.28</version>
+        </dependency>
 
     </dependencies>
     <build>
