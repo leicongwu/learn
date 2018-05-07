@@ -1,6 +1,13 @@
 package com.lcw.learn.solr;
 
+import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.impl.HttpSolrClient;
+import org.apache.solr.common.SolrInputDocument;
+
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by engle on 2018/5/4.
@@ -39,6 +46,7 @@ public class SolrTest {
         }
 
     }
+
     public static SolrClient getSolrClient(){
         return new HttpSolrClient(solrServerUrl+"/"+solrCroeHome);
     }
