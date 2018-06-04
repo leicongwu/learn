@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class SolrTest {
     //solr 服务器地址
-    public static final String solrServerUrl = "http://localhost:8080/solr";
+    public static final String solrServerUrl = "http://localhost:8983/solr";
     //solrhome下的core
     public static final String solrCroeHome = "my_solr";
     //待索引、查询字段

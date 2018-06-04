@@ -21,11 +21,11 @@ import java.io.FileWriter;
 public class JsoupHtmlParser {
 
     public static void main(String[] args) throws Exception {
-        Document doc = Jsoup.connect("https://nuoha.com/book/168270.html").get();
+        Document doc = Jsoup.connect("https://nuoha.com/book/35547.html").get();
         Elements newsHeadline = doc.select("body > div.book > div.box01 > div.left > div.chapter > div > ul > li > a");
 
         //一切都是最好的安排 - 诺哈网
-        String bookName = doc.title();
+        String bookName = doc.title().split("-")[0];
         BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(new File("D://",bookName+".txt")));
         if(newsHeadline!=null && newsHeadline.size() > 0) {
             int size = newsHeadline.size();
