@@ -33,7 +33,7 @@ public class JsoupHtmlParser {
         Document doc = Jsoup.connect("https://nuoha.com/book/48088.html").get();
         Elements newsHeadline = doc.select("body > div.book > div.box01 > div.left > div.chapter > div > ul > li > a");
 
-        //一切都是最好的安排 - 诺哈网
+
         String bookName = doc.title().split("-")[0];
         BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(new File("D://",bookName+".txt")));
         if(newsHeadline!=null && newsHeadline.size() > 0) {
@@ -63,9 +63,6 @@ public class JsoupHtmlParser {
     public void downJyliWeb() throws Exception{
         Document doc = Jsoup.connect("http://book.jiyili.net/0/58/index.html").get();
         Elements newsHeadline = doc.select("#wp > div > div.novel_volume > div.novel_list > ul > li > a");
-        //#wp > div > div.novel_volume > div:nth-child(1)
-        ////*[@id="wp"]/div/div[3]/div[1]
-        //一切都是最好的安排 - 诺哈网
         String bookName = doc.title().split("-")[0];
         BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(new File("D://",bookName+".txt")));
         if(newsHeadline!=null && newsHeadline.size() > 0) {
