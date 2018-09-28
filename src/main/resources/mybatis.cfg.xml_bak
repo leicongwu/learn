@@ -8,7 +8,7 @@
 
     <typeAliases>
         <!-- 别名方式1，一个一个的配置，type中放置的是类的全路径，alias中放置的是类别名
-         <typeAlias type="com.lcw.learn.mybatis.bean.UserBean" alias="UserBean"/>-->
+         <typeAlias type="UserBean" alias="UserBean"/>-->
         <!--别名方式2，自动扫描，将JAVA类的类名作为类的类别名-->
         <package name="com.lcw.learn.mybatis.bean"/>
     </typeAliases>

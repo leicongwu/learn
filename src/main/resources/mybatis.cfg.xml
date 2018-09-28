@@ -6,7 +6,7 @@
         <setting name="logImpl" value="STDOUT_LOGGING"/>
     </settings>
     <typeAliases>
-        <package name="com.lcw.learn.mybatis.bean"/>
+        <package name="com.lifestorm.learn.mybatis.bean"/>
     </typeAliases>
 
     <environments default="learnMybatis">
@@ -22,7 +22,7 @@
     </environments>
 
     <mappers>
-        <package name="com/lcw/learn/mybatis/mapper"/>
+        <package name="com/lifestorm/learn/mybatis/mapper"/>
     </mappers>
 
 </configuration>
