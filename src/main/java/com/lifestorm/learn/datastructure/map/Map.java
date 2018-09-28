@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.Set;
 
 /**
- * Created by life_storm on 2018/9/26.
+ * Created by life_storm on 2018/9/26. test
  */
 public interface Map<K,V> {
 
