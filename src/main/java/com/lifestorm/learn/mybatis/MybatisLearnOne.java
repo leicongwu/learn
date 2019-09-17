@@ -2,35 +2,45 @@ package com.lifestorm.learn.mybatis;
 
 import com.lifestorm.learn.mybatis.bean.UserBean;
 import com.lifestorm.learn.mybatis.mapper.UserMapper;
+import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 
+import java.io.Reader;
 import java.util.List;
 
 /**
  * Created by life_storm on 2018/3/17.
  */
 public class MybatisLearnOne {
-    public static void main(String[] args) {
-//        insertUser();
+    public static void main(String[] args) throws Exception {
+        insertUser();
 //        deleteUser();
 //        selectUserById();
 //        selectAllUser();
-        updateUserById();
+//        updateUserById();
     }
 
     /**
      *新增用户
      */
-    private static void insertUser(){
-        SqlSession session = DBTools.getSession();
-        UserMapper mapper = session.getMapper(UserMapper.class);
-        UserBean userBean = new UserBean(9,"username","pasword",800.0);
+    private static void insertUser() throws Exception{
+        Reader reader = Resources.getResourceAsReader("mybatis.cfg.xml");
+        SqlSessionFactory sessionFactory = new SqlSessionFactoryBuilder().build(reader);
+        SqlSession session = sessionFactory.openSession();
+//        UserMapper mapper = session.getMapper(UserMapper.class);
+        UserBean userBean = new UserBean(7, "username2", "pasword", 900.0);
         try {
-            mapper.insertUser(userBean);
-            session.commit();
+//            mapper.insertUser(userBean);
+//            session.commit();
+            session.insert("com.lifestorm.learn.mybatis.mapper.UserMapper.insertUser",userBean);
+            session.rollback();
         } catch (Exception e) {
             e.printStackTrace();
-            session.rollback();
+        } finally {
+            reader.close();
+            session.close();
         }
     }
 

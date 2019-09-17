@@ -24,6 +24,6 @@ public class DBTools {
     }
 
     public static SqlSession getSession() {
-        return sessionFactory.openSession();
+        return sessionFactory.openSession(false);
     }
 }
