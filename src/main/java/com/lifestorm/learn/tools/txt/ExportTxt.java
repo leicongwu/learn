@@ -1,9 +1,8 @@
 package com.lifestorm.learn.tools.txt;
 
 
-
-
 import com.lifestorm.learn.tools.txt.vo.TableVo;
+import com.lifestorm.learn.tools.txt.vo.TxtConfig;
 import com.lifestorm.learn.vo.TempVo;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
@@ -27,36 +26,37 @@ public class ExportTxt {
 
   public static void main(String[] args) {
     ExportTxt exportTxt = new ExportTxt();
-//    exportTxt.exportTxt();
+//    exportTxt.exportTxtDemo();
     exportTxt.autoCovery();
   }
 
   public void autoCovery(){
     TempVo tempVo = new TempVo();
     tempVo.setEndDate(new Date());
-    tempVo.setName("xiaoming11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111");
+    tempVo.setName("这是一个名字这是一个名字这是一个名字这是一个名字这是一个名字这是一个名字这是一个名字这是一个名字这是一个名字这是一个名字这是一个名字这是一个名字这是一个名字这是一个名字这是一个名字这是一个名字这是一个名字这是一个名字这是一个名字这是一个名字这是一个名字");
     tempVo.setAge(10);
     tempVo.setMoney(110001111111111111L);
-    tempVo.setTimes(0.02d);
+    tempVo.setTimes(100000.02d);
     TempVo tempVo2 = new TempVo();
     tempVo2.setEndDate(new Date());
-    tempVo2.setName("xiaoming2");
-    tempVo2.setAge(10);
-    tempVo2.setMoney(11000);
-    tempVo2.setTimes(0.02d);
+    tempVo2.setName("这是2个名字这名字这是2个名字这是2个名字这是2个名字这是名字这是2个名字这是2个名字这是2个名字这是2个名字这是2个名字这是2个名字这是2个名字这是2个名字这是2个名字这是2个名字这是2个名字这是2个名字这是2个名字这是2个名字这是2个名字这是2个名字这是2个名字这是2个名字这是2个名字这是2个名字这是2个名字这是2个名字这是2个名字这是2个名字这是2个名字这是2个名字这是2个名字这是2个名字这是2个名字这是2个名字这是2个名字这是2个名字这是2个名字这是2个名字这是2个名字");
+    tempVo2.setAge(100);
+    tempVo2.setMoney(1200000000000000000L);
+    tempVo2.setTimes(11.0);
     List<TempVo> tempVos = new ArrayList<TempVo>();
     tempVos.add(tempVo);
     tempVos.add(tempVo2);
-    String[] titleName = new String[]{"姓名","钱"};
-    String[] fileldName = new String[]{"name","money"};
-    Map<Integer,List<String>> contextMap = transferBizListToMap(tempVos,TempVo.class,fileldName,titleName);
-    int MAX_LEN = 50*2;//实际中文字符长度
+    String[] titleName = new String[]{"姓名","钱","次数","年龄"};
+    String[] fileldName = new String[]{"name","money","times","age"};
+   /* Map<Integer,List<String>> contextMap = transferBizListToMap(tempVos,TempVo.class,fileldName,titleName);
+    int MAX_LEN = 20*2;//实际中文字符长度
     int averLen = (int)Math.floor(MAX_LEN/fileldName.length);
     System.out.println("当前定义长度为"+MAX_LEN+"，共有"+fileldName.length+"行需要进行展示，当前计算得出列宽为"+averLen);
-    coverCells(contextMap,averLen);
+    transformCells(contextMap,averLen);*/
+    exportTxt(new TxtConfig(tempVos, TempVo.class, fileldName, titleName, null, 50));
   }
 
-  public void exportTxt(){
+  public void exportTxtDemo(){
     List<String> titleList = new ArrayList<String>();
     titleList.add("品名");
     titleList.add("产地");
@@ -86,11 +86,34 @@ public class ExportTxt {
     contextMap.put(1,row1);
     contextMap.put(2,row2);
     contextMap.put(3,row3);
-    coverCells(contextMap,6);
+    transformCells(contextMap,6);
 
   }
 
 
+  /**
+   *  导出数据集合为txt类型.
+   * @param <T>
+   * @param txtConfig
+   */
+  public <T>void exportTxt(TxtConfig txtConfig){
+    Map<Integer,List<String>> contextMap = transferBizListToMap(txtConfig.getObjList(),
+        txtConfig.getCls(),
+        txtConfig.getColumnName(),
+        txtConfig.getTitleName(),
+        txtConfig.getFormat());
+    if( contextMap ==null){
+      System.out.println("数据为空");
+      return;
+    }
+    if(txtConfig.getChineseLen() <= 0 ){
+      txtConfig.setChineseLen(50);
+    }
+    int MAX_LEN = txtConfig.getChineseLen() *2;//实际中文字符长度
+    int averLen = (int)Math.floor(MAX_LEN/ txtConfig.getColumnName().length);
+    System.out.println("当前定义长度为"+MAX_LEN+"，共有"+ txtConfig.getColumnName().length+"行需要进行展示，当前计算得出列宽为"+averLen);
+    transformCells(contextMap,averLen);
+  }
 
   /**
    * 进行数据转换
@@ -101,7 +124,7 @@ public class ExportTxt {
    * @param <T>
    * @return
    */
-  public <T> Map<Integer, List<String>> transferBizListToMap(List<T> objList, Class<T> cls,
+  private <T> Map<Integer, List<String>> transferBizListToMap(List<T> objList, Class<T> cls,
       String[] columnName, String[] titleName) {
     return transferBizListToMap(objList, cls, columnName,titleName, null);
   }
@@ -117,7 +140,7 @@ public class ExportTxt {
    * @param <T>
    * @return
    */
-  public <T> Map<Integer, List<String>> transferBizListToMap(List<T> objList, Class<T> cls,
+  private <T> Map<Integer, List<String>> transferBizListToMap(List<T> objList, Class<T> cls,
       String[] columnName,String[] titleName, String format) {
     if(columnName == null || titleName == null){
       System.out.println("展示的列名、标题名称不能为空");
@@ -201,7 +224,7 @@ public class ExportTxt {
    * @param rowMap
    * @param maxLen 最大列宽
    */
-  private void coverCells(Map<Integer,List<String>> rowMap, int maxLen){
+  private void transformCells(Map<Integer,List<String>> rowMap, int maxLen){
     TableVo tableVo = new TableVo();
     Set<Integer> keySet = rowMap.keySet();
     Iterator<Integer> iterator = keySet.iterator();
