@@ -111,7 +111,8 @@ public class ExportTxt {
     }
     int MAX_LEN = txtConfig.getChineseLen() *2;//实际中文字符长度
     int averLen = (int)Math.floor(MAX_LEN/ txtConfig.getColumnName().length);
-    System.out.println("当前定义长度为"+MAX_LEN+"，共有"+ txtConfig.getColumnName().length+"行需要进行展示，当前计算得出列宽为"+averLen);
+    System.out.println("当前定义长度为"+MAX_LEN+"，共有"+ txtConfig.getColumnName().length+"行需要进行展示，"
+        + "当前计算得出列宽为"+averLen);
     transformCells(contextMap,averLen);
   }
 
